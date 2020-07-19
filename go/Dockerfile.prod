@@ -1,0 +1,14 @@
+FROM golang:alpine
+
+COPY main.go .
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -a -installsuffix cgo -o main .
+
+FROM scratch
+
+COPY --from=0 /go/main .
+
+CMD ["./main"]
+
+# REPOSITORY           TAG                   IMAGE ID            CREATED             SIZE
+# zenatureza/go-prod   latest                bb3744944207        8 seconds ago       1.46MB

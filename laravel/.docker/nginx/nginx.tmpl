@@ -3,10 +3,14 @@ server {
     index index.php index.html;
     root /var/www/public;
 
+
+    # Make site accessible from http://localhost/
+    server_name localhost;
+
     location ~ \.php$ {
         try_files $uri =404;
         fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass app:9000;
+        fastcgi_pass {{ .Env.APP_HOST }}:{{ .Env.APP_PORT }};
         fastcgi_index index.php;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;

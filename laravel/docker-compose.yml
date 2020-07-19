@@ -8,6 +8,12 @@ services:
     container_name: app
     volumes:
       - ./:/var/www
+    entrypoint: dockerize -template ./.docker/app/.env:./.env -wait tcp://db:3306 ./.docker/entrypoint.sh -timeout 60s
+    environment:
+      - DB_DATABASE=laravel
+      - DB_PASSWORD=root
+      - DB_USERNAME=root
+
     depends_on:
       # in version 3 doesn't wait db's up and running
       - db
@@ -51,6 +57,10 @@ services:
       - "8000:80"
     volumes:
       - ./:/var/www
+    entrypoint: dockerize -template ./.docker/nginx/nginx.tmpl:/etc/nginx/conf.d/nginx.conf -wait tcp://app:9000 -timeout 60s sh ./.docker/nginx/entrypoint.sh
+    environment:
+      - APP_HOST=app
+      - APP_PORT=9000
     depends_on:
       # nginx depends on the main application running
       - app
