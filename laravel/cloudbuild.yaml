@@ -1,4 +1,8 @@
 steps:
+  - id: "Rodando app c/ docker-compose"
+    name: "gcr.io/$PROJECT_ID/docker-compose.1.24.0"
+    args: ["-f", "./laravel/docker-compose.cloudbuild.yml", "up", "-d"]
+
   - id: "Rodando docker ps"
     name: "gcr.io/cloud-builders/docker"
     args: ["ps"]
