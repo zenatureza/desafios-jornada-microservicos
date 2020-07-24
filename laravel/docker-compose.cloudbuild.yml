@@ -1,0 +1,79 @@
+version: "3"
+# version: "2.3"
+
+services:
+  app:
+    image: zenatureza/laravel
+    build: .
+    container_name: app
+    volumes:
+      - ./:/var/www
+    # entrypoint: dockerize -template ./.docker/app/.env.tmpl:./.env -wait tcp://db:3306 ./.docker/entrypoint.sh -timeout 60s
+    # environment:
+    #   - DB_DATABASE=laravel
+    #   - DB_PASSWORD=root
+    #   - DB_USERNAME=root
+
+    depends_on:
+      # in version 3 doesn't wait db's up and running
+      - db
+
+      # should uncomment when using v 2.3
+      # - db:
+      #   condition: service_healthy
+      - redis
+    networks:
+      - app-network
+    # command: sh -c "composer install && cp .env.example .env && php artisan key:generate && php artisan config:cache"
+
+  db:
+    container_name: db
+    build: ./.docker/mysql
+    # image: mysql:5.7.22
+    command: --innodb-use-native-aio=0
+    restart: always
+    ports:
+      - "3301:3306"
+    volumes:
+      - "./.docker/dbdata:/var/lib/mysql"
+    environment:
+      - MYSQL_DATABASE=laravel
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=root
+    networks:
+      - app-network
+
+    # should implement it if using v 2.3
+    # healthcheck:
+
+  nginx:
+    container_name: nginx
+    build: ./.docker/nginx
+    restart: always
+    # enables -it
+    tty: true
+    ports:
+      # debugging in localhost/8001 -> nginx 80 port
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+    entrypoint: dockerize -template ./.docker/nginx/nginx.tmpl:/etc/nginx/conf.d/nginx.conf -wait tcp://app:9000 -timeout 60s sh ./.docker/nginx/entrypoint.sh
+    environment:
+      - APP_HOST=app
+      - APP_PORT=9000
+    depends_on:
+      # nginx depends on the main application running
+      - app
+    networks:
+      - app-network
+
+  redis:
+    image: redis:alpine
+    expose:
+      - 6379
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
