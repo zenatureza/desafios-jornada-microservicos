@@ -44,8 +44,8 @@ steps:
         "-t",
         "gcr.io/$PROJECT_ID/app-laravel:$SHORT_SHA",
         "-f",
-        "Dockerfile.prod",
-        "./laravel",
+        "./laravel/Dockerfile.prod",
+        ".",
       ]
 
   - id: "Pushing image"
