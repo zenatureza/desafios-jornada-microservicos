@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-serivce
+spec:
+  selector:
+    app: nginx
+  type: LoadBalancer
+  ports:
+    - port: 80
+      # targetPort:  8080
